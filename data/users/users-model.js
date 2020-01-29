@@ -9,7 +9,14 @@ function addUser(user) {
     .insert(user)
 }
 
+function findBy(filter) {
+  return db('users')
+    .where(filter)
+    .first();
+}
+
 module.exports = {
   getUsers,
-  addUser
+  addUser,
+  findBy
 }
