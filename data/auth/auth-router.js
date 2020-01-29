@@ -2,19 +2,30 @@ require('dotenv').config();
 // JWT_SECRET
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const validatePostBody = require('../middlewares/validatePostBody')
 const UsersDb = require('../users/users-model');
 
-// function makeToken(user) {
-//   // make a "payload" object
-//   const payload = {
-//     sub: user.id,
-//     // useful for the frontend
-//     username: user.username,
-//   };
-//   // make an 
-// }
+function makeToken(user) {
+  // make a "payload" object
+  const payload = {
+    sub: user.id,
+    // useful for the frontend
+    username: user.username,
+  };
+  // make an "options" object (with expiry)
+  const options = {
+    expiresIn: '1d',
+  };
+  // use the library to make the token
+  const token = jwt.sign(
+    payload,
+    process.env.JWT_SECRET,
+    options
+  );
+  return token;
+}
 
 router.post('/register', validatePostBody, (req, res) => {
   let user = req.body;
@@ -39,8 +50,10 @@ router.post('/login', validatePostBody, (req, res) => {
   UsersDb.findBy({ username })
     .then(user => {
       if(user && bcrypt.compareSync(password, user.password)) {
+        const token = makeToken(user);
         res.status(200).json({
-          message: `Welcome ${user.username}!`
+          message: `Welcome ${user.username}!`,
+          token,
         })
       } else {
         res.status(404).json({
