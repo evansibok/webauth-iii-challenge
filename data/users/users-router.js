@@ -1,8 +1,9 @@
 const router = require('express').Router();
 
+const restricted = require('../middlewares/restricted');
 const UsersDb = require('./users-model');
 
-router.get('/', (req, res) => {
+router.get('/', restricted, (req, res) => {
 
   UsersDb.getUsers()
     .then(users => {
